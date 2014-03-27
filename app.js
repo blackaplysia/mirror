@@ -3,15 +3,14 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var https = require('https');
-var http = require('http');
-var path = require('path');
-var conf = require('config');
-
-var passport = require('passport');
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var express = require('express'),
+  https = require('https'),
+  http = require('http'),
+  path = require('path'),
+  conf = require('config'),
+  passport = require('passport'),
+  ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn,
+  GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 var token = null;
 
@@ -29,7 +28,6 @@ passport.use(new GoogleStrategy({
     callbackURL: conf.google.callbackURL
   },
   function(accessToken, refreshToken, profile, done) {
-    console.log('accessToken: ' + accessToken);
     token = accessToken;
     process.nextTick(function() {
       return done(null, profile);
@@ -45,10 +43,10 @@ app.configure(function() {
   app.set('view engine', 'jade');
   app.use(express.logger('dev'));
   app.use(express.cookieParser());
-  app.use(express.bodyParser());
+  app.use(express.json());
+  app.use(express.urlencoded());
   app.use(express.methodOverride());
   app.use(express.session({ secret: 'keyboard cat' }));
-  app.use(express.json());
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
@@ -69,7 +67,6 @@ function insertCard() {
       'Authorization': 'Bearer ' + token
     }
   }
-  console.log('Token: ' + token);
   var post_req = https.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function(chunk) {
@@ -92,26 +89,27 @@ app.get('/message', ensureLoggedIn('/login'), function(req, res) {
   res.send("Sent a message");
 });
 app.get('/login', function(req, res) {
-  res.redirect('/auth');
+  res.redirect('/auth/google');
 });
-app.get('/auth',
+app.get('/auth', function(req, res) {
+  res.redirect('/auth/google');
+});
+app.get('/auth/google',
   passport.authenticate('google', {
     scope: [
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/glass.timeline' ],
-    failureRedirect: '/login'}),
-  function(req, res) {
-  });
-app.get('/auth/callback',
-  passport.authenticate('google', { failureRedirect: '/login'}),
-  function(req, res) {
-    res.redirect('/');
-  });
+    successReturnToOrRedirect: '/',
+    failureRedirect: '/login'}));
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
+    successRedirect: '/',
+    failureRedirect: '/login'}));
 app.get('/logout', function(req, res) {
   req.logout();
-  res.redirect('/');
+  res.send('Logout');
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

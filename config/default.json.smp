@@ -1,0 +1,7 @@
+{
+    "google":{
+        "clientID":"YOUR_GOOGLE_OAUTH_CLIEND_ID",
+        "clientSecret":"YOUR_GOOGLE_OAUTH_CLIENT_SECRET",
+        "callbackURL":"YOUR_GOOGLE_OAUTH_CALLBACK_URL"
+    }
+}

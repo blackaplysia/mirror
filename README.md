@@ -4,23 +4,26 @@ INSTALL
 =======
 
     cd mirror
-    npm install passport
-    npm install passport-google-oauth
-    npm install connect-ensure-login
-    npm install config
+    npm install
+
+
 
 CONFIGURE
 =========
 
-Edit config/default.json.
+Rename config/default.json.smp to config/default.json and edit your 'clientID',
+'clientSecret', and 'callbackURL'.  Your 'callbackURL' may have a URI like
+"http://exampledomain.com:3700/auth/google/callback".
 
     {
         "google":{
             "clientID":"YOUR_GOOGLE_OAUTH_CLIEND_ID",
             "clientSecret":"YOUR_GOOGLE_OAUTH_CLIENT_SECRET",
-            "callbackURL":"YOUR_GOOGLE_OAYTH_CALLBACK_URL"
+            "callbackURL":"YOUR_GOOGLE_OAUTH_CALLBACK_URL"
         }
     }
+
+
 
 RUN
 ===
