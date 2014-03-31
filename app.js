@@ -1,6 +1,5 @@
-
-/**
- * Module dependencies.
+/*
+ * Google Mirror API Sample.
  */
 
 var express = require('express'),
@@ -56,7 +55,12 @@ app.configure(function() {
 function insertCard() {
   if (!token) return null;
 
-  var data = '{ "text": "Hello, I am a Mirror API.", "notification": {"level": "DEFAULT"}}';
+  var params = {};
+  params.text =  'Hello, I am a Mirror API.';
+  params.notification = {};
+  params.notification.level = 'DEFAULT';
+  var data = JSON.stringify(params);
+
   var options = {
     host: 'www.googleapis.com',
     path: '/mirror/v1/timeline',
@@ -67,6 +71,7 @@ function insertCard() {
       'Authorization': 'Bearer ' + token
     }
   }
+
   var post_req = https.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function(chunk) {
@@ -81,17 +86,14 @@ app.get('/', ensureLoggedIn('/login'), function(req, res) {
   if (!req.user) {
     res.render("login", { title: '/' });
   } else {
-    res.render("message", { title: '/', userName: req.user.displayName });
+    res.render("main", { title: '/', userName: req.user.displayName });
   }
 });
 app.get('/message', ensureLoggedIn('/login'), function(req, res) {
   insertCard();
-  res.send("Sent a message");
+  res.render("message");
 });
 app.get('/login', function(req, res) {
-  res.redirect('/auth/google');
-});
-app.get('/auth', function(req, res) {
   res.redirect('/auth/google');
 });
 app.get('/auth/google',
@@ -107,7 +109,7 @@ app.get('/auth/google/callback',
     failureRedirect: '/login'}));
 app.get('/logout', function(req, res) {
   req.logout();
-  res.send('Logout');
+  res.render("logout");
 });
 
 app.listen(app.get('port'), function(){
